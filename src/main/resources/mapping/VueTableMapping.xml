@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.VueTableMapper">
+    <select id="queryAll" parameterType="java.util.Map" resultType="com.example.demo.model.VueTable">
+        select id as id, title as title, reviewer as reviewer, author as author, `type` as type, remark as remark, `timestamp` as `timestamp`
+        from vue_table
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title like concat('%',#{title},'%')
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+        </where>
+        <if test="rows !=null">
+            limit  <if test="startRow !=null"> #{startRow},</if> #{rows}
+        </if>
+    </select>
+
+    <select id="queryCount" parameterType="java.util.Map" resultType="int">
+        select count(*)
+        from vue_table
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="title != null and title != ''">
+                and title like concat('%',#{title},'%')
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addVueTable" parameterType="com.example.demo.model.VueTable" keyProperty="id" useGeneratedKeys="true">
+        insert into vue_table(id, title, reviewer, author, `type`, `timestamp`, remark)
+        values (#{id},#{title},#{reviewer},#{author},#{type},now(),#{remark})
+    </insert>
+
+    <delete id="delVueTable">
+        delete from vue_table where id = #{id}
+    </delete>
+
+    <update id="updateVueTable" parameterType="java.util.Map">
+        update vue_table
+        <set>
+            <if test="title != null and title != ''">
+                title = #{title},
+            </if>
+            <if test="type != null and type != ''">
+                `type` = #{type},
+            </if>
+            <if test="remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test="reviewer != null and reviewer != ''">
+                reviewer = #{reviewer},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!-- 测试 choose,when,otherwise-->
+    <select id="queryTest" parameterType="java.util.Map" resultType="com.example.demo.model.VueTable">
+        select *
+        from vue_table where 1 = 1
+        <choose>
+            <when test="title != '' and title != null">
+                and title like concat('%',#{title},'%')
+            </when>
+            <when test="author != '' and author != null">
+                and author = #{author}
+            </when>
+            <otherwise>
+                and `type` = 'CN'
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 测试foreach -->
+    <select id="queryByForeachTest" resultType="com.example.demo.model.VueTable" >
+        SELECT *
+        FROM vue_table
+        WHERE `type` in
+        <foreach item="item" index="index" collection="list"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>
